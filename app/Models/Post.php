@@ -42,6 +42,20 @@ class Post extends Model
         'published_at' => 'datetime'
     ];
 
+  
+    protected static function boot()
+    {
+        parent::boot();
+    
+        /**
+         * データの登録と更新時に同じ処理を行いたいのでsavingというイベントに処理を追加
+         */
+        // 保存時user_idをログインユーザーに設定
+        self::saving(function($post) {
+            $post->user_id = \Auth::id();
+        });
+    }
+
 
     /**
      * Scope
@@ -53,9 +67,15 @@ class Post extends Model
     }
     
     // 公開記事一覧取得
-    public function scopePublicList(Builder $query)
+    public function scopePublicList(Builder $query, string $tagSlug = null)
     {
+        if ($tagSlug) {
+            $query->whereHas('tags', function($query) use ($tagSlug) {
+                $query->where('slug', $tagSlug);
+            });
+        }
         return $query
+            ->with('tags')
             ->public()
             ->latest('published_at')
             ->paginate(10);
@@ -73,12 +93,34 @@ class Post extends Model
      * ゲッタ-
      */
     // ゲッターはモデルにget●●●Attributeという名前でメソッドを作ります。
-    
+
     // 公開日を年月日で表示
     public function getPublishedFormatAttribute()
     {
         return $this->published_at->format('Y年m月d日');
     }
 
+    /**
+     * リレーション
+     * 
+     * カラム名がリレーション先の「モデル_id」なら上記の通りで問題ありませんが、
+     * もしそれ以外のカラム名を関連付ける場合はbelongsToの第二引数に指定します。
+     */
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+     */
+    public function tags()
+    {
+        return $this->belongsToMany(Tag::class);
+    }
 
 }

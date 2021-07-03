@@ -14,7 +14,12 @@ class PostSeeder extends Seeder
      */
     public function run()
     {
-        Post::factory()->count(50)->create();
-
+        /**
+         * savingイベントでログイン情報を読み込むような処理をすると、
+         * シーダーのコマンド実行時にもイベントが実行されてしまいエラーになります
+         */
+        \Event::fakeFor(function () {
+            Post::factory()->count(50)->create();
+        });
     }
 }
