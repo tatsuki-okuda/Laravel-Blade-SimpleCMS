@@ -16,11 +16,10 @@
             <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false">
                 <span class="navbar-toggler-icon"></span>
             </button>
- 
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
                 <ul class="navbar-nav ml-auto">
-                    <li class="nav-item">
-                      <a class="nav-link" href="{{ route('back.dashboard') }}">ダッシュボード</a>
+                    <li class="nav-item{{ Request::is('admin') ? ' active' : '' }}">
+                        <a class="nav-link" href="{{ route('back.dashboard') }}">ダッシュボード</a>
                     </li>
                     <li class="nav-item{{ Request::is('admin/posts', 'admin/posts/*') ? ' active' : '' }}">
                         <a class="nav-link" href="{{ route('back.posts.index') }}">投稿</a>
@@ -28,6 +27,11 @@
                     <li class="nav-item{{ Request::is('admin/tags', 'admin/tags/*') ? ' active' : '' }}">
                         <a class="nav-link" href="{{ route('back.tags.index') }}">タグ</a>
                     </li>
+                    @can('admin')
+                    <li class="nav-item{{ Request::is('admin/users', 'admin/users/*') ? ' active' : '' }}">
+                        <a class="nav-link" href="{{ route('back.users.index') }}">ユーザー</a>
+                    </li>
+                    @endcan
                     <li class="nav-item">
                         <a href="#" class="nav-link" onClick="(function(){
                             document.getElementById('logout-form').submit();
@@ -35,6 +39,9 @@
                         })();">ログアウト</a>
                         {{ Form::open(['route' => 'logout', 'id' => 'logout-form']) }}
                         {{ Form::close() }}
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ route('front.home') }}" target="_blank">サイトを表示</a>
                     </li>
                 </ul>
             </div>

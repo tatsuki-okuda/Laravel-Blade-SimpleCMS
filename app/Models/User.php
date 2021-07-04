@@ -47,6 +47,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'role',
     ];
 
     /**
@@ -66,8 +67,21 @@ class User extends Authenticatable
      */
     protected $casts = [
         'email_verified_at' => 'datetime',
+        'role' => 'integer'
     ];
 
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        // 保存時user_idをログインユーザーに設定
+        self::saving(function($user) {
+            if ($user->password) {
+                $user->password = Hash::make($user->password);
+            }
+        });
+    }
 
     /**
      * リレーション
@@ -75,5 +89,15 @@ class User extends Authenticatable
     public function posts()
     {
         return $this->hasMany(Post::class);
+    }
+
+     /**
+     * 権限をラベル表示
+     *
+     * @return string
+     */
+    public function getRoleLabelAttribute()
+    {
+        return config('common.user.roles')[$this->role];
     }
 }
